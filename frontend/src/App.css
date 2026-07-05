@@ -1,0 +1,13 @@
+.app-container {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.counter-btn {
+  display: block;
+  width: 200px;
+  padding: 10px 16px;
+  margin: 16px auto 0;
+  font-size: 16px;
+  cursor: pointer;
+}
