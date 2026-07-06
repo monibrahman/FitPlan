@@ -5,7 +5,7 @@ function App() {
   const [message, setMessage] = useState('Loading...')
 
   useEffect(() => {
-    fetch('http://localhost:8000/')
+    fetch(`${import.meta.env.VITE_API_URL}/`)
       .then((response) => response.json())
       .then((data) => setMessage(data.message))
       .catch((error) => setMessage('Could not reach the backend'))
