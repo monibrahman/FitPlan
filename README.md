@@ -1,7 +1,15 @@
 # FitPlan
 Personalized fitness and nutrition web application
 
+# Back End
+Python
+Fast API
+PostgresSQL/SQL Alchemy
 
+
+# Front End
+Node
+React
 
 
 ## License
