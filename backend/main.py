@@ -80,3 +80,34 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 @app.get("/me", response_model=schemas.UserResponse)
 def read_current_user(user: models.User = Depends(get_current_user)):
     return user
+
+@app.post("/profile", response_model=schemas.ProfileResponse)
+def create_profile(
+    profile: schemas.ProfileCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    existing_profile = db.query(models.Profile).filter(models.Profile.user_id == current_user.id).first()
+    if existing_profile:
+        raise HTTPException(status_code=400, detail="Profile already exists")
+    
+    new_profile = models.Profile(
+        weight=profile.weight,
+        height=profile.height,
+        goal=profile.goal,
+        activity_level=profile.activity_level,
+        dietary_preference=profile.dietary_preference,
+        user_id=current_user.id,
+    )
+    db.add(new_profile)
+    db.commit()
+    db.refresh(new_profile)
+    return new_profile
+
+@app.get("/profile", response_model=schemas.ProfileResponse)
+def read_current_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    existing_profile = db.query(models.Profile).filter(models.Profile.user_id == current_user.id).first()
+    if not existing_profile:
+        raise HTTPException(status_code=404, detail="Profile does not exist")
+    
+    return existing_profile

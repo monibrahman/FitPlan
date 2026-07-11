@@ -10,8 +10,8 @@ class UserResponse(BaseModel):
     email: EmailStr
     full_name: str | None = None
 
-class Config:
-    from_attributes = True
+    class Config:
+        from_attributes = True
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -20,4 +20,22 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str | None = "bearer"
-    
+
+class ProfileCreate(BaseModel):
+    weight: float | None = None
+    height: float | None = None
+    goal: str | None = None
+    activity_level: str | None = None
+    dietary_preference: str | None = None
+
+class ProfileResponse(BaseModel):
+    id: int
+    weight: float | None = None
+    height: float | None = None
+    goal: str | None = None
+    activity_level: str | None = None
+    dietary_preference: str | None = None
+    user_id: int
+
+    class Config:
+        from_attributes = True
