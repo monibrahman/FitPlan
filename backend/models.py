@@ -15,6 +15,7 @@ class Profile(Base):
     __tablename__="profiles"
 
     id = Column(Integer, primary_key=True, index=True)
+    age = Column(Integer, nullable=True)
     weight = Column(Float, nullable=True )
     height = Column(Float, nullable=True)
     goal = Column(String, nullable=True)

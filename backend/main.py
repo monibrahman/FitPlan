@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
-from database import engine, get_db
+from database import get_db
 from security import hash_password, verify_password
 from security import create_jwt_token
 from security import verify_jwt_token
 
-models.Base.metadata.create_all(bind=engine)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 app = FastAPI()
@@ -92,6 +92,7 @@ def create_profile(
         raise HTTPException(status_code=400, detail="Profile already exists")
     
     new_profile = models.Profile(
+        age=profile.age,
         weight=profile.weight,
         height=profile.height,
         goal=profile.goal,

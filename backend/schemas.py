@@ -22,6 +22,7 @@ class Token(BaseModel):
     token_type: str | None = "bearer"
 
 class ProfileCreate(BaseModel):
+    age: int | None = None
     weight: float | None = None
     height: float | None = None
     goal: str | None = None
@@ -30,6 +31,7 @@ class ProfileCreate(BaseModel):
 
 class ProfileResponse(BaseModel):
     id: int
+    age: int | None = None
     weight: float | None = None
     height: float | None = None
     goal: str | None = None
