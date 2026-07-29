@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import RegisterForm from './RegisterForm'
+import LoginForm from './LoginForm'
+import Profile from './Profile'
 
 function App() {
   const [message, setMessage] = useState('Loading...')
@@ -32,15 +35,9 @@ function App() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          full_name: fullname,
-        }),
+        body: JSON.stringify({ email, password, full_name: fullname }),
       })
-
       const data = await response.json()
-
       if (response.ok) {
         setRegistermessage("Registration successful! You can now log in.")
       } else {
@@ -56,14 +53,9 @@ function App() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: loginEmail,
-          password: loginPassword,
-        }),
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       })
-
       const loginData = await response.json()
-
       if (response.ok) {
         localStorage.setItem("token", loginData.access_token)
         setToken(loginData.access_token)
@@ -90,9 +82,7 @@ function App() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/profile`, {
         headers: { "Authorization": `Bearer ${token}` },
       })
-
       const profileData = await response.json()
-
       if (response.ok) {
         setProfile(profileData)
         setProfilemessage('')
@@ -103,17 +93,18 @@ function App() {
       setProfilemessage("Network error, could not load profile!")
     }
   }
-    useEffect(() => {
+
+  useEffect(() => {
     if (token) {
       handleGetProfile()
     }
   }, [token])
 
-const handleCreateProfile = async () => {
+  const handleCreateProfile = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/profile`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
           age: profileAge,
           height: profileHeight,
@@ -123,21 +114,17 @@ const handleCreateProfile = async () => {
           dietary_preference: profileDietaryPreference,
         }),
       })
-
       const profileData = await response.json()
-
       if (response.ok) {
         setProfile(profileData)
-        setProfilemessage("Profile successfully updated!")
+        setProfilemessage("Profile created!")
       } else {
         setProfilemessage(profileData.detail)
       }
     } catch (error) {
-      setProfilemessage("Network error, could not register!")
+      setProfilemessage("Network error, could not create profile!")
     }
   }
-
-
 
   return (
     <div className="app-container">
@@ -146,126 +133,34 @@ const handleCreateProfile = async () => {
       <p>Backend says: {message}</p>
 
       {token ? (
-        <div>
-          <h2>Dashboard</h2>
-          <button onClick={handleGetProfile}>Get Profile</button>
-          <button onClick={handleLogout}>Logout</button>
-          <p>{profilemessage}</p>
-
-          {profile ? (
-            <div>
-              <h3>Your Profile</h3>
-              <p>Age: {profile.age}</p>
-              <p>Weight: {profile.weight}</p>
-              <p>Height: {profile.height}</p>
-              <p>Goal: {profile.goal}</p>
-              <p>Activity Level: {profile.activity_level}</p>
-              <p>Dietary Preference: {profile.dietary_preference}</p>
-            </div>
-          ) : (
-            <div>
-              <h3>Create Profile</h3>
-              <div>
-                <input
-                  type="number"
-                  placeholder="Age"
-                  value={profileAge}
-                  onChange={(e) => setProfileAge(e.target.value)}
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  placeholder="Weight (lbs)"
-                  value={profileWeight}
-                  onChange={(e) => setProfileWeight(e.target.value)}
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  placeholder="Height (inches)"
-                  value={profileHeight}
-                  onChange={(e) => setProfileHeight(e.target.value)}
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Goal"
-                  value={profileGoal}
-                  onChange={(e) => setProfileGoal(e.target.value)}
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Activity Level"
-                  value={profileActivityLevel}
-                  onChange={(e) => setProfileActivityLevel(e.target.value)}
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Dietary Preference"
-                  value={profileDietaryPreference}
-                  onChange={(e) => setProfileDietaryPreference(e.target.value)}
-                />
-              </div>
-              <button onClick={handleCreateProfile}>Create Profile</button>
-            </div>
-          )}
-        </div>
+        <Profile
+          profile={profile}
+          profilemessage={profilemessage}
+          profileAge={profileAge} setProfileAge={setProfileAge}
+          profileWeight={profileWeight} setProfileWeight={setProfileWeight}
+          profileHeight={profileHeight} setProfileHeight={setProfileHeight}
+          profileGoal={profileGoal} setProfileGoal={setProfileGoal}
+          profileActivityLevel={profileActivityLevel} setProfileActivityLevel={setProfileActivityLevel}
+          profileDietaryPreference={profileDietaryPreference} setProfileDietaryPreference={setProfileDietaryPreference}
+          handleCreateProfile={handleCreateProfile}
+          handleGetProfile={handleGetProfile}
+          handleLogout={handleLogout}
+        />
       ) : (
         <div>
-          <h2>Register</h2>
-          <div>
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={fullname}
-              onChange={(e) => setFullname(e.target.value)}
-            />
-          </div>
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button onClick={handleRegister}>Register</button>
-          <p>{registermessage}</p>
-
-          <h2>Login</h2>
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-            />
-          </div>
-          <button onClick={handleLogin}>Login</button>
-          <p>{loginmessage}</p>
+          <RegisterForm
+            fullname={fullname} setFullname={setFullname}
+            email={email} setEmail={setEmail}
+            password={password} setPassword={setPassword}
+            handleRegister={handleRegister}
+            registermessage={registermessage}
+          />
+          <LoginForm
+            loginEmail={loginEmail} setLoginEmail={setLoginEmail}
+            loginPassword={loginPassword} setLoginPassword={setLoginPassword}
+            handleLogin={handleLogin}
+            loginmessage={loginmessage}
+          />
         </div>
       )}
     </div>
