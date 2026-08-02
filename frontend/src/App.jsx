@@ -4,6 +4,7 @@ import './App.css'
 import RegisterForm from './RegisterForm'
 import LoginForm from './LoginForm'
 import Profile from './Profile'
+import { Dumbbell } from 'lucide-react'
 
 function App() {
   const [message, setMessage] = useState('Loading...')
@@ -24,6 +25,7 @@ function App() {
   const [profileActivityLevel, setProfileActivityLevel] = useState('')
   const [profileDietaryPreference, setProfileDietaryPreference] = useState('')
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/`)
@@ -79,6 +81,7 @@ function App() {
   setLoginEmail('')
   setLoginPassword('')
   navigate("/")
+  setUser(null)
 }
 
   const handleGetProfile = async () => {
@@ -97,12 +100,27 @@ function App() {
       setProfilemessage("Network error, could not load profile!")
     }
   }
-
-  useEffect(() => {
-    if (token) {
-      handleGetProfile()
+const handleGetMe = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/me`, {
+      headers: { "Authorization": `Bearer ${token}` },
+    })
+    const userData = await response.json()
+    if (response.ok) {
+      setUser(userData)
     }
-  }, [token])
+  } catch (error) {
+    // silently ignore; name greeting just won't show
+  }
+}
+  useEffect(() => {
+  if (token) {
+    handleGetProfile()
+    handleGetMe()
+  }
+}, [token])
+
+  
 
   const handleCreateProfile = async () => {
     try {
@@ -131,20 +149,29 @@ function App() {
   }
 
 return (
-    <div className="app-container">
-      <nav>
-        <Link to="/">Home</Link>
-        {!token && <Link to="/register"> Register</Link>}
-        {!token && <Link to="/login"> Login</Link>}
-        {token && <Link to="/dashboard"> Dashboard</Link>}
-        {token && <button onClick={handleLogout}>Logout</button>}
-      </nav>
-
-      <h1>FitPlan</h1>
+    <div className="min-h-screen bg-gray-100">
+      <nav className="flex items-center gap-6 bg-slate-800 px-6 py-4 text-white">
+ <Link to="/" className="flex items-center gap-2 text-xl">
+  <Dumbbell className="text-blue-400" />
+  <span className="font-bold">Uni<span className="text-blue-400">Fit</span></span>
+</Link>
+  <div className="flex gap-4 ml-auto">
+    {!token && <Link to="/register" className="hover:text-blue-300">Register</Link>}
+    {!token && <Link to="/login" className="hover:text-blue-300">Login</Link>}
+    {token && <Link to="/dashboard" className="hover:text-blue-300">Dashboard</Link>}
+    {token && (
+      <button onClick={handleLogout} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
+        Logout
+      </button>
+    )}
+  </div>
+</nav>
+ <div className="max-w-2xl mx-auto p-6">
+      
 
       <Routes>
         <Route path="/" element={
-          <p>Your personalized fitness and nutrition companion.</p>
+          <p align='center'>Your personalized fitness and nutrition companion.</p>
         } />
 
         <Route path="/register" element={
@@ -180,6 +207,7 @@ return (
               handleCreateProfile={handleCreateProfile}
               handleGetProfile={handleGetProfile}
               handleLogout={handleLogout}
+              user={user}
             />
           ) : (
             <p>Please log in to view your dashboard.</p>
@@ -193,6 +221,7 @@ return (
   </div>
 } />
       </Routes>
+    </div>
     </div>
   )
 }
