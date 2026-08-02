@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import './App.css'
 import RegisterForm from './RegisterForm'
 import LoginForm from './LoginForm'
@@ -22,6 +23,7 @@ function App() {
   const [profileGoal, setProfileGoal] = useState('')
   const [profileActivityLevel, setProfileActivityLevel] = useState('')
   const [profileDietaryPreference, setProfileDietaryPreference] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/`)
@@ -57,10 +59,11 @@ function App() {
       })
       const loginData = await response.json()
       if (response.ok) {
-        localStorage.setItem("token", loginData.access_token)
-        setToken(loginData.access_token)
-        setLoginmessage('')
-      } else {
+  localStorage.setItem("token", loginData.access_token)
+  setToken(loginData.access_token)
+  setLoginmessage('')
+  navigate("/dashboard")
+} else {
         setLoginmessage(loginData.detail)
       }
     } catch (error) {
@@ -69,13 +72,14 @@ function App() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    setToken(null)
-    setProfile(null)
-    setProfilemessage('')
-    setLoginEmail('')
-    setLoginPassword('')
-  }
+  localStorage.removeItem("token")
+  setToken(null)
+  setProfile(null)
+  setProfilemessage('')
+  setLoginEmail('')
+  setLoginPassword('')
+  navigate("/")
+}
 
   const handleGetProfile = async () => {
     try {
@@ -126,28 +130,24 @@ function App() {
     }
   }
 
-  return (
+return (
     <div className="app-container">
-      <h1>FitPlan</h1>
-      <p>Your personalized fitness and nutrition companion.</p>
-      <p>Backend says: {message}</p>
+      <nav>
+        <Link to="/">Home</Link>
+        {!token && <Link to="/register"> Register</Link>}
+        {!token && <Link to="/login"> Login</Link>}
+        {token && <Link to="/dashboard"> Dashboard</Link>}
+        {token && <button onClick={handleLogout}>Logout</button>}
+      </nav>
 
-      {token ? (
-        <Profile
-          profile={profile}
-          profilemessage={profilemessage}
-          profileAge={profileAge} setProfileAge={setProfileAge}
-          profileWeight={profileWeight} setProfileWeight={setProfileWeight}
-          profileHeight={profileHeight} setProfileHeight={setProfileHeight}
-          profileGoal={profileGoal} setProfileGoal={setProfileGoal}
-          profileActivityLevel={profileActivityLevel} setProfileActivityLevel={setProfileActivityLevel}
-          profileDietaryPreference={profileDietaryPreference} setProfileDietaryPreference={setProfileDietaryPreference}
-          handleCreateProfile={handleCreateProfile}
-          handleGetProfile={handleGetProfile}
-          handleLogout={handleLogout}
-        />
-      ) : (
-        <div>
+      <h1>FitPlan</h1>
+
+      <Routes>
+        <Route path="/" element={
+          <p>Your personalized fitness and nutrition companion.</p>
+        } />
+
+        <Route path="/register" element={
           <RegisterForm
             fullname={fullname} setFullname={setFullname}
             email={email} setEmail={setEmail}
@@ -155,14 +155,44 @@ function App() {
             handleRegister={handleRegister}
             registermessage={registermessage}
           />
+        } />
+
+        <Route path="/login" element={
           <LoginForm
             loginEmail={loginEmail} setLoginEmail={setLoginEmail}
             loginPassword={loginPassword} setLoginPassword={setLoginPassword}
             handleLogin={handleLogin}
             loginmessage={loginmessage}
           />
-        </div>
-      )}
+        } />
+
+        <Route path="/dashboard" element={
+          token ? (
+            <Profile
+              profile={profile}
+              profilemessage={profilemessage}
+              profileAge={profileAge} setProfileAge={setProfileAge}
+              profileWeight={profileWeight} setProfileWeight={setProfileWeight}
+              profileHeight={profileHeight} setProfileHeight={setProfileHeight}
+              profileGoal={profileGoal} setProfileGoal={setProfileGoal}
+              profileActivityLevel={profileActivityLevel} setProfileActivityLevel={setProfileActivityLevel}
+              profileDietaryPreference={profileDietaryPreference} setProfileDietaryPreference={setProfileDietaryPreference}
+              handleCreateProfile={handleCreateProfile}
+              handleGetProfile={handleGetProfile}
+              handleLogout={handleLogout}
+            />
+          ) : (
+            <p>Please log in to view your dashboard.</p>
+          )
+        } />
+        <Route path="*" element={
+  <div>
+    <h2>404 — Page not found</h2>
+    <p>That page doesn't exist.</p>
+    <Link to="/">Go home</Link>
+  </div>
+} />
+      </Routes>
     </div>
   )
 }
